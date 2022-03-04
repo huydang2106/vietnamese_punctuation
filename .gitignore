@@ -1,0 +1,6 @@
+checkpoint_BiLSTM_Att
+checkpoint_BiLSTM_Att_icomm_news
+dataset/*
+embeddings/*
+cc.en.300.bin/
+cc.vi.300.bin.gz.part
