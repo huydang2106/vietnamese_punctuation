@@ -181,7 +181,13 @@ class BiLSTM_Attention_model(Model):
 
         # return micro_f_val, train_loss
         return -1, train_loss
+    '''
+    Convert to tf.dataset (Utilize gpu)
+    '''
     def flatten_dataset(self,custom_set):
+        '''
+        Reshape char token. Each list present a word need  to be modified to fix length 
+        '''
         def modify(my_set):
             fix = 6
             res = []
@@ -189,7 +195,7 @@ class BiLSTM_Attention_model(Model):
                 new_record = []
                 for word in record:
                     if len(word) > fix:
-                        word = word[:fix]
+                        word = word[:fix] # Dump code. Modify later. 
                     elif len(word) < fix:
                         pad = fix - len(word)
                         word.extend([0]*pad)
@@ -205,10 +211,7 @@ class BiLSTM_Attention_model(Model):
             chars_tokens.extend(batch['chars'])
             labels_tokens.extend(batch['labels'])
         chars_tokens = modify(chars_tokens)
-        import numpy
-        print(numpy.array(words_tokens).shape)
-        print(numpy.array(chars_tokens).shape)
-        print(numpy.array(labels_tokens).shape)
+
         words_tokens = tf.convert_to_tensor(words_tokens)
         chars_tokens =  tf.convert_to_tensor(chars_tokens)
         labels_tokens = tf.convert_to_tensor(labels_tokens)
