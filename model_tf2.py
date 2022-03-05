@@ -66,7 +66,7 @@ class BiLSTM_Attention_model(Model):
         self.dropout1 = tf.keras.layers.Dropout(rate=self.drop_rate)
         self.dropout2 = tf.keras.layers.Dropout(rate=self.drop_rate)
       
-        
+
             
         self.lstm_fw_cell = tf.keras.layers.LSTM(self.cfg["num_units"],return_sequences=True)
     
@@ -116,18 +116,16 @@ class BiLSTM_Attention_model(Model):
         if lr is not None:
             feed_dict["lr"] = lr
         return feed_dict
-    def call(self,feed_dict):
+    def call(self,words_tokens,chars_tokens):
         # feed_dict = self._get_feed_dict(batch)
         # Build embedding layer
         
-        feed_dict['words'] = tf.convert_to_tensor(feed_dict['words'])
-        feed_dict['chars'] = tf.convert_to_tensor(feed_dict['chars'])
-        
-        word_emb = self.word_embeddings(feed_dict['words'])
-        
-        char_emb = self.char_embeddings(feed_dict['chars'])
+       
+        word_emb = self.word_embeddings(words_tokens)
+        char_emb = self.char_embeddings(chars_tokens)
+
         char_represent = multi_conv1d(char_emb, self.cfg["filter_sizes"],self.cfg["channel_sizes"],conv2d=self.char_conv,
-                                        drop_rate=self.drop_rate, is_train=feed_dict['is_train'])
+                                        drop_rate=self.drop_rate, is_train=True)
         word_emb = tf.concat([word_emb, char_represent], axis=-1)
 
         word_emb = self.dropout1(word_emb)
@@ -155,12 +153,14 @@ class BiLSTM_Attention_model(Model):
         prog = Progbar(target=num_batches)
         for i, batch_data in tqdm(enumerate(train_set)):
             # import time
-            feed_dict = self._get_feed_dict(batch_data)
+            words_tokens, chars_tokens,labels = batch_data
+       
+
             # st_time  = time.time()
             with tf.GradientTape() as tape:
 
-                logits = self(feed_dict)
-                train_loss = loss_obj(logits,feed_dict['labels'])
+                logits = self(words_tokens,chars_tokens)
+                train_loss = loss_obj(logits,labels)
             # print('fw and loss: ',time.time() - st_time)
             
             gradients = tape.gradient(train_loss, self.trainable_variables)
@@ -181,13 +181,47 @@ class BiLSTM_Attention_model(Model):
 
         # return micro_f_val, train_loss
         return -1, train_loss
-    
+    def flatten_dataset(self,custom_set):
+        def modify(my_set):
+            fix = 6
+            res = []
+            for record in my_set:
+                new_record = []
+                for word in record:
+                    if len(word) > fix:
+                        word = word[:fix]
+                    elif len(word) < fix:
+                        pad = fix - len(word)
+                        word.extend([0]*pad)
+                    new_record.append(word)
+                res.append(new_record)
+            return res
+        words_tokens = []
+        chars_tokens = []
+        labels_tokens = []
+
+        for batch in tqdm(custom_set):
+            words_tokens.extend(batch['words'])
+            chars_tokens.extend(batch['chars'])
+            labels_tokens.extend(batch['labels'])
+        chars_tokens = modify(chars_tokens)
+        import numpy
+        print(numpy.array(words_tokens).shape)
+        print(numpy.array(chars_tokens).shape)
+        print(numpy.array(labels_tokens).shape)
+        words_tokens = tf.convert_to_tensor(words_tokens)
+        chars_tokens =  tf.convert_to_tensor(chars_tokens)
+        labels_tokens = tf.convert_to_tensor(labels_tokens)
+        print('return dataset')
+        return tf.data.Dataset.from_tensor_slices((words_tokens,chars_tokens,labels_tokens)).batch(32)
     def train(self, train_set, valid_set):
         self.logger.info("Start training...")
         best_f1, no_imprv_epoch = -np.inf, 0
         # self._add_summary()
         loss_obj = CustomLoss()
         optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr)
+        train_set = self.flatten_dataset(train_set[:100])
+        print('load done')
         for epoch in range(1, self.cfg["epochs"] + 1):
             self.logger.info('Epoch {}/{}: '.format(epoch, self.cfg["epochs"],))
             micro_f_val, train_loss = self.train_epoch(train_set,valid_set, epoch,loss_obj,optimizer)  # train epochs
@@ -212,6 +246,7 @@ class BiLSTM_Attention_model(Model):
     
     
     def _predict_op(self, data):
+        pass
         feed_dict = self._get_feed_dict(data)
         pred_logits = tf.cast(tf.argmax(self.logits, axis=-1), tf.int32)
         logits = self.sess.run(pred_logits, feed_dict=feed_dict)

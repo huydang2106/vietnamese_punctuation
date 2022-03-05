@@ -16,7 +16,7 @@ from loss_function import focal_loss
 from sklearn.metrics import recall_score, precision_score, f1_score
 from typing import List
 # from utils.punctuation_preprocess import build_dataset
-from preprocessing import word_convert, EOS_TOKENS, build_dataset,PUNCTUATIONS,PUNCTUATION_SYM
+from preprocessing import word_convert, EOS_TOKENS, build_dataset,PUNCTUATION_SYM
 # from sklearn.metrics import confusion_matrix
 #
 # def p_r_f1(y_true, y_pred):

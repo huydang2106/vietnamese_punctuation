@@ -2,8 +2,8 @@ import pickle
 import tensorflow as tf
 from preprocessing import process_data
 from model_tf2 import BiLSTM_Attention_model
-from model_tf2 import train
-from model import batchnize_dataset
+# from model_tf2 import train
+# from model import batchnize_dataset
 import traceback
 # dataset path
 prefix_dataset_path = 'dataset/icomm_news_dataset/'
@@ -79,21 +79,21 @@ if not os.path.exists(config["save_path"]):
 print("Load datasets...")
 
 # used for training
-train_set = batchnize_dataset(config["dev_set"], config["batch_size"], shuffle=True)
-with open('dataset/icomm_news_dataset/cached_dataset/train.pkl','wb') as f:
-    pickle.dump(train_set,f)
+# train_set = batchnize_dataset(config["dev_set"], config["batch_size"], shuffle=True)
+# with open('dataset/icomm_news_dataset/cached_dataset/train.pkl','wb') as f:
+#     pickle.dump(train_set,f)
 
-train_set = batchnize_dataset(config["dev_set"], batch_size=config["batch_size"], shuffle=False)
-with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','wb') as f:
-    pickle.dump(train_set,f)
+# train_set = batchnize_dataset(config["dev_set"], batch_size=config["batch_size"], shuffle=False)
+# with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','wb') as f:
+#     pickle.dump(train_set,f)
 
-valid_set = batchnize_dataset(config["test_set"], batch_size=config["batch_size"], shuffle=False)
-with open('dataset/icomm_news_dataset/cached_dataset/test.pkl','wb') as f:
-    pickle.dump(valid_set,f)
+# valid_set = batchnize_dataset(config["test_set"], batch_size=config["batch_size"], shuffle=False)
+# with open('dataset/icomm_news_dataset/cached_dataset/test.pkl','wb') as f:
+#     pickle.dump(valid_set,f)
 
-# with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','rb') as f:
-#     train_set = pickle.load(f)
-# # valid_set = train_set
+with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','rb') as f:
+    train_set = pickle.load(f)
+valid_set = train_set
 # with open('dataset/icomm_news_dataset/cached_dataset/test.pkl','rb') as f:
 #     valid_set = pickle.load(f)
 
