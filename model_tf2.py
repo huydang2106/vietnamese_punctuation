@@ -223,7 +223,7 @@ class BiLSTM_Attention_model(Model):
         # self._add_summary()
         loss_obj = CustomLoss()
         optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr)
-        train_set = self.flatten_dataset(train_set[:100])
+        train_set = self.flatten_dataset(train_set)
         print('load done')
         for epoch in range(1, self.cfg["epochs"] + 1):
             self.logger.info('Epoch {}/{}: '.format(epoch, self.cfg["epochs"],))
