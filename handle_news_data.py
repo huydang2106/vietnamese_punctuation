@@ -99,7 +99,7 @@ def get_data():
         with open('show_sen.json','w') as f:
             
             json.dump(temp_ls[:100],f,ensure_ascii=False)
-     
+        
         split_index1 = int(len(temp_ls)*train_ratio)
         split_index2 = split_index1 + int(len(temp_ls)*dev_ratio)
         print(split_index1,split_index2,len(temp_ls))

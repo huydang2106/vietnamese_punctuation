@@ -3,7 +3,7 @@ import tensorflow as tf
 from preprocessing import process_data
 from model_tf2 import BiLSTM_Attention_model
 # from model_tf2 import train
-# from model import batchnize_dataset
+from model import batchnize_dataset
 import traceback
 # dataset path
 prefix_dataset_path = 'dataset/icomm_news_dataset/'
@@ -74,35 +74,38 @@ import os
 
 if not os.path.exists(config["save_path"]):
     os.mkdir(config["save_path"])
-    process_data(config)
+process_data(config)
 
 print("Load datasets...")
 
 # used for training
-# train_set = batchnize_dataset(config["dev_set"], config["batch_size"], shuffle=True)
-# with open('dataset/icomm_news_dataset/cached_dataset/train.pkl','wb') as f:
-#     pickle.dump(train_set,f)
+train_set = batchnize_dataset(config["dev_set"], config["batch_size"], shuffle=True)
+with open('dataset/icomm_news_dataset/cached_dataset/train.pkl','wb') as f:
+    pickle.dump(train_set,f)
 
-# train_set = batchnize_dataset(config["dev_set"], batch_size=config["batch_size"], shuffle=False)
-# with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','wb') as f:
-#     pickle.dump(train_set,f)
+valid_set = batchnize_dataset(config["dev_set"], batch_size=config["batch_size"], shuffle=False)
+with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','wb') as f:
+    pickle.dump(valid_set,f)
 
 # valid_set = batchnize_dataset(config["test_set"], batch_size=config["batch_size"], shuffle=False)
 # with open('dataset/icomm_news_dataset/cached_dataset/test.pkl','wb') as f:
 #     pickle.dump(valid_set,f)
 
-with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','rb') as f:
-    train_set = pickle.load(f)
-valid_set = train_set
-# with open('dataset/icomm_news_dataset/cached_dataset/test.pkl','rb') as f:
-#     valid_set = pickle.load(f)
 
+# with open('dataset/icomm_news_dataset/cached_dataset/train.pkl','rb') as f:
+#     train_set = pickle.load(f)
+
+# with open('dataset/icomm_news_dataset/cached_dataset/valid.pkl','rb') as f:
+#     valid_set = pickle.load(f)
+print('Number of batch (batch size = 2):')
+print(len(train_set))
+print(len(valid_set))
 # with open('dataset/icomm_news_dataset/cached_dataset/test.pkl','rb') as f:
 #     test_set = pickle.load(f)
 print('load done')
-# tf.config.threading.set_inter_op_parallelism_threads(
-#     30
-# )
+tf.config.threading.set_inter_op_parallelism_threads(
+    30
+)
 # tf.compat.v1.disable_eager_execution()
 # tf.compat.v1.reset_default_graph()
 

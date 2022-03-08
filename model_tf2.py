@@ -189,7 +189,7 @@ class BiLSTM_Attention_model(Model):
         Reshape char token. Each list present a word need  to be modified to fix length 
         '''
         def modify(my_set):
-            fix = 6
+            fix = 8
             res = []
             for record in my_set:
                 new_record = []
@@ -216,6 +216,7 @@ class BiLSTM_Attention_model(Model):
         chars_tokens =  tf.convert_to_tensor(chars_tokens)
         labels_tokens = tf.convert_to_tensor(labels_tokens)
         print('return dataset')
+        print('Data length',len(words_tokens))
         return tf.data.Dataset.from_tensor_slices((words_tokens,chars_tokens,labels_tokens)).batch(32)
     def train(self, train_set, valid_set):
         self.logger.info("Start training...")
@@ -223,6 +224,7 @@ class BiLSTM_Attention_model(Model):
         # self._add_summary()
         loss_obj = CustomLoss()
         optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr)
+        print('flatten dataset...')
         train_set = self.flatten_dataset(train_set)
         valid_set = self.flatten_dataset(valid_set)
         print('load done')
@@ -232,20 +234,20 @@ class BiLSTM_Attention_model(Model):
             
             self.logger.info('Train loss: {} - Valid micro average fscore: {}'.format(train_loss, micro_f_val))
             cur_f1 = micro_f_val
-            if cur_f1 > best_f1:
-                no_imprv_epoch = 0
-                best_f1 = cur_f1
-                '''
-                Need to restore this block of code to evaluate model after 1 epoch
-                '''
-    #               f1_test, out_str = self.evaluate_punct(test_set, "test")
-    #               self.logger.info("\nEvaluate on {} dataset:\n{}\n".format("test", out_str))
+    #         if cur_f1 > best_f1:
+    #             no_imprv_epoch = 0
+    #             best_f1 = cur_f1
+    #             '''
+    #             Need to restore this block of code to evaluate model after 1 epoch
+    #             '''
+    # #               f1_test, out_str = self.evaluate_punct(test_set, "test")
+    # #               self.logger.info("\nEvaluate on {} dataset:\n{}\n".format("test", out_str))
                 
-            else:
-                no_imprv_epoch += 1
-                if no_imprv_epoch >= self.cfg["no_imprv_tolerance"]:
-                    self.logger.info("Early Stopping at epoch - Valid micro average fscore: {:04.2f} - {:04.2f}".format(epoch, best_f1))
-                    break
+    #         else:
+    #             no_imprv_epoch += 1
+    #             if no_imprv_epoch >= self.cfg["no_imprv_tolerance"]:
+    #                 self.logger.info("Early Stopping at epoch - Valid micro average fscore: {:04.2f} - {:04.2f}".format(epoch, best_f1))
+    #                 break
             self.save_weights(self.checkpoint_path + self.cfg["model_name"])
     
     

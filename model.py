@@ -64,7 +64,8 @@ def process_batch_data(batch_words, batch_chars, batch_labels=None):
         return {"words": b_words, "chars": b_chars, "seq_len": b_words_len, "char_seq_len": b_chars_len,
                 "batch_size": len(b_words)}
     else:
-        b_labels, _ = pad_sequences(batch_labels)
+        b_labels, _ = pad_sequences(batch_labels,pad='O')
+
         return {"words": b_words, "chars": b_chars, "labels": b_labels, "seq_len": b_words_len, "char_seq_len": b_chars_len,
                 "batch_size": len(b_words)}
 
